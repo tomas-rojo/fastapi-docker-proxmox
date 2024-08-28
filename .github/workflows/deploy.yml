@@ -48,5 +48,21 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           echo "${{ secrets.GHA_DEPLOY_SSH_PUBLIC_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/id_rsa.pub       
-          ssh-keyscan -H 192.168.1.208 >> ~/.ssh/known_hosts
           ls -la ~/.ssh
+
+      - name: Deploy to Proxmox VM
+        env:
+          PROXMOX_HOST: ${{ secrets.PROXMOX_HOST }}
+          PROXMOX_USERNAME: ${{ secrets.PROXMOX_USERNAME }}
+          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_PASSWORD }}
+          VM_IP: ${{ secrets.VM_IP }}
+          DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no $PROXMOX_USERNAME@$VM_IP << 'EOF'
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+            docker pull $DOCKER_IMAGE
+            docker stop my-fastapi-app || true
+            docker rm my-fastapi-app || true
+            docker run -d --name my-fastapi-app -p 80:80 $DOCKER_IMAGE
+          EOF
