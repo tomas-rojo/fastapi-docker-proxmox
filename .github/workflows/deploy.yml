@@ -41,28 +41,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up SSH key
+      - name: Setup SSH
         run: |
-          env
-          mkdir -p ~/.ssh
-          echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.GHA_DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.GHA_DEPLOY_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 22 ${{ secrets.ARTIFACT_HOST }} >> ~/.ssh/known_hosts
-          sudo apt-get install sshpass
-
-      - name: Deploy to Proxmox VM
-        env:
-          PROXMOX_HOST: ${{ secrets.PROXMOX_HOST }}
-          PROXMOX_USERNAME: ${{ secrets.PROXMOX_USERNAME }}
-          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_PASSWORD }}
-          VM_IP: ${{ secrets.VM_IP }}
-          DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          sshpass -p "$PROXMOX_PASSWORD" ssh -o StrictHostKeyChecking=no $PROXMOX_USERNAME@$VM_IP << 'EOF'
-            echo "$GITHUB_TOKEN" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-            docker pull $DOCKER_IMAGE
-            docker stop my-fastapi-app || true
-            docker rm my-fastapi-app || true
-            docker run -d --name my-fastapi-app -p 80:80 $DOCKER_IMAGE
-          EOF
+          chmod 600 ~/.ssh/id_rsa.pub
+          ssh-keyscan -H ${{ secrets.VM_IP }} >> ~/.ssh/known_hosts
