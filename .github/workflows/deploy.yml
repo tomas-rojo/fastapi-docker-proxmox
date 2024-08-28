@@ -44,10 +44,10 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh/
-          # Print the contents of the .ssh directory for debugging (optional)
+          echo "${{ secrets.GHA_DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.GHA_DEPLOY_SSH_PUBLIC_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa.pub
+          ssh-keyscan -H ${{ secrets.VM_IP }} >> ~/.ssh/known_hosts          
           ls -la ~/.ssh
-          # echo "${{ secrets.GHA_DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          # echo "${{ secrets.GHA_DEPLOY_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
-          # chmod 600 ~/.ssh/id_rsa
-          # chmod 600 ~/.ssh/id_rsa.pub
-          # ssh-keyscan -H ${{ secrets.VM_IP }} >> ~/.ssh/known_hosts
+          cat ~/.ssh/known_hosts
