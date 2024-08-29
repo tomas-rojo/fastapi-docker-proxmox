@@ -46,20 +46,15 @@ jobs:
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.GHA_DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VM_IP }} > ~/.ssh/known_hosts
+          # ssh-keyscan -H ${{ secrets.VM_IP }} > ~/.ssh/known_hosts
 
-      # - name: Deploy to Proxmox VM
-      #   env:
-      #     PROXMOX_HOST: ${{ secrets.PROXMOX_HOST }}
-      #     PROXMOX_USERNAME: ${{ secrets.PROXMOX_USERNAME }}
-      #     PROXMOX_PASSWORD: ${{ secrets.PROXMOX_PASSWORD }}
-      #     VM_IP: ${{ secrets.VM_IP }}
-      #     DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     ssh -i ~/.ssh/id_rsa \
-      #           -o StrictHostKeyChecking=no \
-      #           -o PasswordAuthentication=no \
-      #           -o BatchMode=yes \
-      #           -T \
-      #           $PROXMOX_USERNAME@$VM_IP
+      - name: Deploy to Proxmox VM
+        env:
+          PROXMOX_HOST: ${{ secrets.PROXMOX_HOST }}
+          PROXMOX_USERNAME: ${{ secrets.PROXMOX_USERNAME }}
+          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_PASSWORD }}
+          VM_IP: ${{ secrets.VM_IP }}
+          DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ssh -T $PROXMOX_USERNAME@$VM_IP
