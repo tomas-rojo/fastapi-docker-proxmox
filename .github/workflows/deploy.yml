@@ -57,8 +57,8 @@ jobs:
           DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-        ssh -i ~/.ssh/id_rsa \
-              -o StrictHostKeyChecking=no \
-              -o PasswordAuthentication=no \
-              -o BatchMode=yes \
-              $PROXMOX_USERNAME@$VM_IP
+          ssh -i ~/.ssh/id_rsa \
+                -o StrictHostKeyChecking=no \
+                -o PasswordAuthentication=no \
+                -o BatchMode=yes \
+                $PROXMOX_USERNAME@$VM_IP
